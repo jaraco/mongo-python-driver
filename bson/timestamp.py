@@ -17,6 +17,8 @@
 
 import calendar
 import datetime
+import collections
+import json
 
 from bson.py3compat import integer_types
 from bson.tz_util import utc
@@ -118,3 +120,26 @@ class Timestamp(object):
         The returned datetime's timezone is UTC.
         """
         return datetime.datetime.fromtimestamp(self.__time, utc)
+
+    def dump(self, stream):
+        """Serialize self to text stream.
+
+        Matches convention of mongooplog.
+        """
+        items = (
+            ('time', self.time),
+            ('inc', self.inc),
+        )
+        # use ordered dict to retain order when possible
+        cls = getattr(collections, 'OrderedDict', dict)
+        ts = cls(items)
+        json.dump(dict(ts=ts), stream)
+
+    @classmethod
+    def load(cls, stream):
+        """Load a serialized version of self from text stream.
+
+        Expects the format used by mongooplog.
+        """
+        data = json.load(stream)['ts']
+        return cls(data['time'], data['inc'])
