@@ -118,3 +118,8 @@ class Timestamp(object):
         The returned datetime's timezone is UTC.
         """
         return datetime.datetime.fromtimestamp(self.__time, utc)
+
+    def next(self):
+        """Return another :class:`Timestamp` that's one inc greater.
+        """
+        return self.__class__(self.time, self.inc + 1)
